@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>City General Hospital — Indoor Navigation</title>
+
+<style>
+    :root {
+        --bg-primary: #f8fafc;
+        --card-bg: #ffffff;
+        --navy: #0f172a;
+        --navy-light: #1e293b;
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-light: #eff6ff;
+        --success: #16a34a;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        background-color: var(--bg-primary);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .mobile-container {
+        width: 100%;
+        max-width: 430px;
+        background-color: var(--card-bg);
+        min-height: 100vh;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    @media (min-width: 431px) {
+        .mobile-container {
+            border-radius: 28px;
+            margin: 20px 0;
+            min-height: calc(100vh - 40px);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+    }
+
+    header {
+        background: linear-gradient(135deg, var(--navy), var(--navy-light));
+        color: white;
+        padding: 20px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .badge-floor {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .container {
+        padding: 14px;
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding-bottom: 30px;
+    }
+
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+        font-size: 1rem;
+        color: var(--navy);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .start-banner {
+        background: var(--accent-light);
+        border: 1px solid #bfdbfe;
+        padding: 12px 14px;
+        border-radius: 12px;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .start-icon {
+        background: var(--accent);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .start-details strong {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--navy);
+    }
+
+    .start-details span {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+
+    .destinations-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        max-height: 240px;
+        overflow-y: auto;
+    }
+
+    .destination-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .destination-card.active {
+        border: 2px solid var(--accent);
+        background: var(--accent-light);
+    }
+
+    .destination-card .dest-icon {
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+    }
+
+    .destination-card strong {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--navy);
+    }
+
+    .destination-card small {
+        color: var(--text-muted);
+        display: block;
+        margin-top: 2px;
+        font-size: 0.65rem;
+    }
+
+    button {
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: transform 0.1s, background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    .btn-primary {
+        width: 100%;
+        background: var(--accent);
+        color: white;
+        margin-top: 14px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-secondary {
+        background: var(--bg-primary);
+        color: var(--navy);
+        border: 1px solid var(--border);
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    /* Navigation Screen Styling */
+    .map-wrapper {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 10px;
+        position: relative;
+        box-shadow: var(--shadow);
+    }
+
+    svg {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+    .room {
+        fill: #e2e8f0;
+        stroke: #cbd5e1;
+        stroke-width: 1.5;
+    }
+
+    .corridor {
+        fill: #ffffff;
+        stroke: #f1f5f9;
+        stroke-width: 1;
+    }
+
+    .route {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 8 6;
+        animation: dash 15s linear infinite;
+    }
+
+    @keyframes dash {
+        to {
+            stroke-dashoffset: -200;
+        }
+    }
+
+    .location {
+        fill: var(--accent);
+        stroke: white;
+        stroke-width: 3;
+    }
+
+    .destination-marker {
+        fill: var(--success);
+        stroke: white;
+        stroke-width: 3;
+    }
+
+    .map-label {
+        font-size: 8px;
+        fill: var(--navy);
+        font-weight: 700;
+        text-anchor: middle;
+    }
+
+    .room-number {
+        font-size: 7px;
+        fill: var(--text-muted);
+        text-anchor: middle;
+    }
+
+    .action-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .action-row button {
+        flex: 1;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="mobile-container">
+    <header>
+        <div class="header-top">
+            <h2>City General Hospital</h2>
+            <span class="badge-floor">Ground Floor</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- DESTINATION SCREEN -->
+        <section id="selection">
+            <div class="card">
+                <h3>Select Destination</h3>
+                <div class="start-banner">
+                    <div class="start-icon">📍</div>
+                    <div class="start-details">
+                        <strong>Main Entrance Lobby</strong>
+                        <span>Ground Floor Corridor</span>
+                    </div>
+                </div>
+
+                <div class="destinations-grid" id="destinations"></div>
+
+                <button class="btn-primary" onclick="findRoute()">
+                    Start Direct Path →
+                </button>
+            </div>
+        </section>
+
+        <!-- NAVIGATION SCREEN -->
+        <section id="navigation" class="hidden">
+            <div class="map-wrapper">
+                <svg id="hospitalMap" viewBox="0 0 400 420">
+                    <!-- Left side rooms with room numbers -->
+                    <rect class="room" x="20" y="20" width="110" height="80" rx="6"/>
+                    <text class="map-label" x="75" y="52">OPD CLINIC</text>
+                    <text class="room-number" x="75" y="68">Room 101</text>
+
+                    <rect class="room" x="20" y="120" width="110" height="80" rx="6"/>
+                    <text class="map-label" x="75" y="152">LABORATORY</text>
+                    <text class="room-number" x="75" y="168">Room 102</text>
+
+                    <rect class="room" x="20" y="220" width="110" height="80" rx="6"/>
+                    <text class="map-label" x="75" y="252">RADIOLOGY</text>
+                    <text class="room-number" x="75" y="268">Room 103</text>
+
+                    <!-- Right side rooms with room numbers -->
+                    <rect class="room" x="270" y="20" width="110" height="80" rx="6"/>
+                    <text class="map-label" x="325" y="52">CARDIOLOGY</text>
+                    <text class="room-number" x="325" y="68">Room 201</text>
+
+                    <rect class="room" x="270" y="120" width="110" height="80" rx="6"/>
+                    <text class="map-label" x="325" y="152">PHARMACY</text>
+                    <text class="room-number" x="325" y="168">Room 202</text>
+
+                    <rect class="room" x="270" y="220" width="110" height="80" rx="6"/>
+                    <text class="map-label" x="325" y="252">EMERGENCY (ER)</text>
+                    <text class="room-number" x="325" y="268">Room 203</text>
+
+                    <!-- Straight vertical central corridor -->
+                    <rect class="corridor" x="135" y="20" width="130" height="380"/>
+                    <text class="map-label" x="200" y="380" fill="#94a3b8">MAIN CORRIDOR</text>
+                    <text class="map-label" x="200" y="365" fill="#64748b">ENTRANCE</text>
+
+                    <!-- Direct Straight Route Line -->
+                    <polyline id="routeLine" class="route" points="200,370 200,60"/>
+
+                    <!-- Patient location marker (Start) -->
+                    <circle id="patient" class="location" cx="200" cy="370" r="8"/>
+
+                    <!-- Destination Marker -->
+                    <circle id="destinationMarker" class="destination-marker" cx="200" cy="60" r="8"/>
+                </svg>
+            </div>
+
+            <div class="action-row">
+                <button class="btn-primary" onclick="startWalk()">
+                    ▶ Start Walking
+                </button>
+                <button class="btn-secondary" onclick="endNavigation()">
+                    Back
+                </button>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const start = { x: 200, y: 370 };
+
+    // Destinations positioned directly along the straight vertical corridor alignment (x: 200)
+    const destinations = [
+        {name: "OPD Clinic", room: "Room 101", icon: "📋", x: 200, y: 60},
+        {name: "Cardiology", room: "Room 201", icon: "❤️", x: 200, y: 60},
+        {name: "Laboratory", room: "Room 102", icon: "🔬", x: 200, y: 160},
+        {name: "Pharmacy", room: "Room 202", icon: "💊", x: 200, y: 160},
+        {name: "Radiology", room: "Room 103", icon: "🩻", x: 200, y: 260},
+        {name: "Emergency (ER)", room: "Room 203", icon: "🚑", x: 200, y: 260}
+    ];
+
+    let selected = destinations[0];
+    let currentX = start.x;
+    let currentY = start.y;
+    let walkTimer = null;
+
+    function renderDestinations() {
+        const container = document.getElementById("destinations");
+        container.innerHTML = "";
+
+        destinations.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "destination-card" + (selected === item ? " active" : "");
+
+            const iconDiv = document.createElement("div");
+            iconDiv.className = "dest-icon";
+            iconDiv.textContent = item.icon;
+
+            const name = document.createElement("strong");
+            name.textContent = item.name;
+
+            const floor = document.createElement("small");
+            floor.textContent = item.room;
+
+            card.append(iconDiv, name, floor);
+            card.onclick = () => {
+                selected = item;
+                renderDestinations();
+            };
+
+            container.appendChild(card);
+        });
+    }
+
+    renderDestinations();
+
+    function findRoute() {
+        if (!selected) return;
+
+        currentX = start.x;
+        currentY = start.y;
+
+        document.getElementById("selection").classList.add("hidden");
+        document.getElementById("navigation").classList.remove("hidden");
+
+        // Set destination marker coordinate directly in a straight vertical line
+        document.getElementById("destinationMarker").setAttribute("cx", selected.x);
+        document.getElementById("destinationMarker").setAttribute("cy", selected.y);
+
+        document.getElementById("patient").setAttribute("cx", currentX);
+        document.getElementById("patient").setAttribute("cy", currentY);
+
+        // Straight line path from entrance to selected target y
+        const routePoints = `${start.x},${start.y} ${selected.x},${selected.y}`;
+        document.getElementById("routeLine").setAttribute("points", routePoints);
+    }
+
+    function startWalk() {
+        clearInterval(walkTimer);
+        currentX = start.x;
+        currentY = start.y;
+
+        walkTimer = setInterval(() => {
+            if (currentY <= selected.y) {
+                clearInterval(walkTimer);
+                return;
+            }
+
+            currentY -= 3; // Move straight up along the corridor
+            document.getElementById("patient").setAttribute("cy", currentY);
+
+            if (currentY <= selected.y) {
+                currentY = selected.y;
+                document.getElementById("patient").setAttribute("cy", currentY);
+                clearInterval(walkTimer);
+            }
+        }, 50);
+    }
+
+    function endNavigation() {
+        clearInterval(walkTimer);
+        document.getElementById("navigation").classList.add("hidden");
+        document.getElementById("selection").classList.remove("hidden");
+    }
+</script>
+
+</body>
+</html>
